@@ -1,0 +1,17 @@
+{
+  "name": "socialnetwork_nosql",
+  "version": "1.0.0",
+  "description": "Social Network backend",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "seed": "node utils/seed"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/QuitoMusic/socialNetwork_NoSQL"
+  },
+  "author": "QuitoMusic",
+  "license": "MIT"
+}
