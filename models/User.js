@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    match: [/.+@.+\..+/, 'Please enter a valid email address']
+    match: [/.+@.+\..+/, 'Please enter a valid email']
   },
   thoughts: [
     {
@@ -27,8 +27,8 @@ const userSchema = new mongoose.Schema({
   ]
 });
 
-// Virtual property to get friendCount
-userSchema.virtual('friendCount').get(function() {
+// Virtual to calculate friend count
+userSchema.virtual('friendCount').get(function () {
   return this.friends.length;
 });
 
