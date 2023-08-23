@@ -1,4 +1,4 @@
-const Thought = require('../../../Projects/Dummy/models/Thought');
+const Thought = require('../models/Thought');
 
 const reactionController = {
   createReaction: async (req, res) => {

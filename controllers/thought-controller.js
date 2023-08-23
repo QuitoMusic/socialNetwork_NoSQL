@@ -1,5 +1,5 @@
-const Thought = require('../../../Projects/Dummy/models/Thought');
-const User = require('../../../Projects/Dummy/models/User');
+const Thought = require('../models/Thought');
+const User = require('../models/User');
 
 const thoughtController = {
   getAllThoughts: async (req, res) => {
