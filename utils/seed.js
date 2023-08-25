@@ -1,44 +1,50 @@
-// seeds/seed.js
-
-const mongoose = require('mongoose');
+const connection = require('../config/connection');
 const User = require('../models/User');
 const Thought = require('../models/Thought');
 
-mongoose.connect('mongodb://localhost/social-network', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+connection.on('error', (err) => err);
 
-const seedData = async () => {
-  try {
-    // Create users
-    const users = await User.create([
-      { username: 'user1', email: 'user1@example.com' },
-      { username: 'user2', email: 'user2@example.com' },
-      // Add more users as needed
-    ]);
+const users = [ {
+    username: 'Pepe',
+    email: 'Pepito@gmail.com',
+  },
+  {
+    username: 'Pedro',
+    email: 'pedrito@gmail.com',
+  },
+  {
+    username: 'Juan',
+    email: 'bobo@gmail.com',
+  },
+  {
+    username: 'Emile',
+    email: 'emile@gmail.com',
+  },
+  {
+    username: 'Pelito',
+    email: 'afro@gmail.com',
+  },
+  {
+    username: 'Danny',
+    email: 'daniel@gmail.com',
+  },
+  {
+    username: 'Trisha',
+    email: 'paytas@gmail.com',
+  },
+  {
+    username: 'Ethan',
+    email: 'klein@gmail.com',
+  },]
+  
+  connection.once('open', async () => {
+    console.log('connected');
 
-    // Create thoughts
-    const thoughts = await Thought.create([
-      {
-        thoughtText: 'Wepa!',
-        username: users[0].username
-      },
-      {
-        thoughtText: 'Que es la que hay!?',
-        username: users[1].username
-      },
-      // Add more thoughts as needed
-    ]);
-
-    console.log('Seed data inserted successfully');
-  } catch (error) {
-    console.error('Error inserting seed data:', error);
-  } finally {
-    // Close the connection
-    mongoose.disconnect();
+    let userCheck = await connection.db.listCollections({ name: 'users' }).toArray();
+  if (userCheck.length) {
+    await connection.dropCollection('users');
   }
-};
-
-// Run the seed data function
-seedData();
+    await User.collection.insertMany(users);
+    console.log('database seeded');
+    return;
+  });
