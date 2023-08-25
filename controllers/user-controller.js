@@ -1,88 +1,127 @@
 const User = require('../models/User');
 const Thought = require('../models/Thought');
 
-const userController = {
-  getAllUsers: async (req, res) => {
+module.exports = {
+  async getUsers(req, res) {
     try {
-      const users = await User.find().populate('thoughts friends');
+      const users = await User.find();
       res.json(users);
     } catch (err) {
       res.status(500).json(err);
     }
   },
 
-  getUserById: async (req, res) => {
+  async getSingleUser(req, res) {
     try {
-      const user = await User.findById(req.params.userId)
-        .populate('thoughts friends');
-      res.json(user);
-    } catch (err) {
-      res.status(404).json(err);
-    }
-  },
+      const user = await User.findOne({ _id: req.params.userId }).select('-__v');
 
-  createUser: async (req, res) => {
-    try {
-      const user = await User.create(req.body);
-      res.json(user);
-    } catch (err) {
-      res.status(400).json(err);
-    }
-  },
-
-  updateUser: async (req, res) => {
-    try {
-      const user = await User.findByIdAndUpdate(
-        req.params.userId,
-        req.body,
-        { new: true }
-      );
-      res.json(user);
-    } catch (err) {
-      res.status(400).json(err);
-    }
-  },
-
-  deleteUser: async (req, res) => {
-    try {
-      const user = await User.findByIdAndDelete(req.params.userId);
-
-      // Remove user's associated thoughts
-      if (user.thoughts.length > 0) {
-        await Thought.deleteMany({ _id: { $in: user.thoughts } });
+      if (!user) {
+        return res.status(404).json({ message: 'No user with that ID' });
       }
 
       res.json(user);
     } catch (err) {
-      res.status(400).json(err);
+      res.status(500).json(err);
     }
   },
 
-  addFriend: async (req, res) => {
+  async createUser(req, res) {
     try {
-      const user = await User.findOneAndUpdate(
-        { _id: req.params.userId },
-        { $addToSet: { friends: req.params.friendId } },
-        { new: true }
-      );
-      res.json(user);
+      const dbUserData = await User.create(req.body);
+      res.json(dbUserData);
     } catch (err) {
-      res.status(400).json(err);
+      res.status(500).json(err);
     }
   },
 
-  removeFriend: async (req, res) => {
+  async updateUser(req, res) {
     try {
-      const user = await User.findOneAndUpdate(
-        { _id: req.params.userId },
-        { $pull: { friends: req.params.friendId } },
+      const userId = req.params.userId;
+      const updatedData = req.body;
+
+      const user = await User.findByIdAndUpdate(
+        userId,
+        { $set: updatedData },
         { new: true }
-      );
+      ).select('-__v');
+
+      if (!user) {
+        return res.status(404).json({ message: 'No user with that ID' });
+      }
+
       res.json(user);
     } catch (err) {
-      res.status(400).json(err);
+      res.status(500).json(err);
+    }
+  },
+
+  async deleteSingleUser(req, res) {
+    try {
+      const user = await User.findOneAndDelete({ _id: req.params.userId }).select('-__v');
+
+      if (!user) {
+        return res.status(404).json({ message: 'No user with that ID' });
+      }
+
+      res.json({ message: 'User And Associated Thoughts Deleted' });
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  },
+  async createUsersFriend(req, res) {
+    try {
+      const userId = req.params.userId; // Assuming you need the user ID to associate the friend
+      const friendId = req.params.friendId;
+  
+      // First, make sure the friend exists
+      const friend = await User.findOne({ _id: friendId }).select('-__v');
+  
+      if (!friend) {
+        return res.status(404).json({ message: 'No friend with that ID' });
+      }
+  
+      // You would then update the user's friend list with the friend's ID
+      const user = await User.findOneAndUpdate(
+        { _id: userId },
+        { $push: { friends: friendId } }, // Assuming your User schema has a 'friends' array
+        { new: true }
+      ).select('-__v');
+  
+      if (!user) {
+        return res.status(404).json({ message: 'No user with that ID' });
+      }
+  
+      res.json(user);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  },
+  async deleteUsersFriend(req, res) {
+    try {
+      const userId = req.params.userId; // Assuming you need the user ID to remove the friend
+      const friendId = req.params.friendId;
+  
+      // First, make sure the friend exists
+      const friend = await User.findOne({ _id: friendId }).select('-__v');
+  
+      if (!friend) {
+        return res.status(404).json({ message: 'No friend with that ID' });
+      }
+  
+      // You would then update the user's friend list to remove the friend's ID
+      const user = await User.findOneAndUpdate(
+        { _id: userId },
+        { $pull: { friends: friendId } }, // Assuming your User schema has a 'friends' array
+        { new: true }
+      ).select('-__v');
+  
+      if (!user) {
+        return res.status(404).json({ message: 'No user with that ID' });
+      }
+  
+      res.json(user);
+    } catch (err) {
+      res.status(500).json(err);
     }
   }
 };
-
-module.exports = userController;
